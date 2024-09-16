@@ -1,6 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 function Login() {
   const {
@@ -9,7 +11,32 @@ function Login() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = async (data) => {
+    const userinfo = {
+      emailid: data.email,
+      password: data.password,
+    };
+    try {
+      const res = await axios.post(
+        "http://localhost:4001/user/login",
+        userinfo
+      );
+      if (res.data) {
+        toast.success("You have successfully logged in");
+        document.getElementById("my_modal_3").close();
+        setTimeout(() => {
+          window.location.reload();
+          localStorage.setItem("User", JSON.stringify(res.data.user));
+        }, 1000);
+      }
+    } catch (error) {
+      if (error.response) {
+        toast.error("Error: " + error.response.data.message);
+        console.log("Error:" + error);
+        setTimeout(()=>{},2000)
+      }
+    }
+  };
   return (
     <div>
       <dialog id="my_modal_3" className="modal">

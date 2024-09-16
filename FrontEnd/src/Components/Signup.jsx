@@ -1,16 +1,44 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Login from "./Login";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 function Signup() {
+  const location = useLocation();
+  const Navigate = useNavigate();
+  const from = location.state?.from?.pathname || "/";
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = async (data) => {
+    const userindfo = {
+      fullname: data.name,
+      emailid: data.email,
+      password: data.password,
+    };
+    try {
+      const res = await axios.post(
+        "http://localhost:4001/user/signup",
+        userindfo
+      );
+      console.log(res);
+      if (res.data) {
+        toast.success("You are successfully Signed up");
+        Navigate(from, { replace: true });
+      }
+      localStorage.setItem("User", JSON.stringify(res.data.user));
+    } catch (error) {
+      if (error.response) {
+        console.error(error);
+        toast.error("Error: " + error.response.data.message);
+      }
+    }
+  };
   return (
     <>
       <div className="flex h-screen justify-center items-center">
@@ -32,12 +60,15 @@ function Signup() {
                   type="text"
                   placeholder="Enter your Name"
                   className="border rounded-md py-1 px-2 outline-none w-80"
-                  {...register("name", { required: true })}
+                  {...register("name", {
+                    required: true,
+                    message: "This field is required",
+                  })}
                 />
                 <br />
                 {errors.name && (
                   <span className="text-sm text-red-500">
-                    This field is required
+                    {errors.name.message}
                   </span>
                 )}
               </div>
@@ -49,12 +80,15 @@ function Signup() {
                   type="email"
                   placeholder="Enter your email"
                   className="border rounded-md py-1 px-2 outline-none w-80"
-                  {...register("email", { required: true })}
+                  {...register("email", {
+                    required: true,
+                    messgae: "This field is required",
+                  })}
                 />
                 <br />
                 {errors.email && (
                   <span className="text-sm text-red-500">
-                    This field is required
+                    {errors.name.message}
                   </span>
                 )}
               </div>
@@ -66,12 +100,15 @@ function Signup() {
                   type="password"
                   placeholder="Enter your Password"
                   className="border rounded py-1 px-2 outline-none w-80"
-                  {...register("password", { required: true })}
+                  {...register("password", {
+                    required: true,
+                    message: "This field is required",
+                  })}
                 />
                 <br />
                 {errors.password && (
                   <span className="text-sm text-red-500">
-                    This field is required
+                    {errors.name.message}
                   </span>
                 )}
               </div>
